@@ -13,8 +13,8 @@ export const unavailable = new Set([
   "G1",
   "G2",
 ]);
-export function toggleSeat(selected: string[], seat: string): string[] {
-  if (!/^[A-G](?:[1-9]|10)$/.test(seat) || unavailable.has(seat))
+export function toggleSeat(selected: string[], seat: string, blocked: ReadonlySet<string> = unavailable): string[] {
+  if (!/^[A-G](?:[1-9]|10)$/.test(seat) || blocked.has(seat))
     return selected;
   return selected.includes(seat)
     ? selected.filter((s) => s !== seat)

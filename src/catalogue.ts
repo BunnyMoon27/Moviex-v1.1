@@ -1,5 +1,6 @@
 export type Movie = {
   id: number;
+  bookingMovieId?: number | null;
   title: string;
   overview: string;
   poster: string;

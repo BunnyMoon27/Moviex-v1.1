@@ -144,8 +144,8 @@ main:focus {
 .hero {
   max-width: 1440px;
   margin: 0 auto;
-  min-height: 590px;
-  height: calc(78vh - 88px);
+  min-height: 540px;
+  height: calc(72svh - var(--header-height));
   max-height: 740px;
   position: relative;
   isolation: isolate;
@@ -1920,3 +1920,83 @@ body { font-size: 15px; line-height: 1.55; }
 .trailer-frame iframe {border:0;display:block;width:100%;height:100%;}
 .trailer-unavailable {padding:30px;background:#15171b;border-radius:10px;}
 @media(max-width:600px){.trailer-section{margin-top:35px}.trailer-frame{border-radius:6px}}
+
+/* Local frontend feature additions; intentionally separate from existing design. */
+.workspace-mobile-nav{display:none!important}
+.checkout-contact,.checkout-plan{margin:0 0 32px}
+.checkout-contact h2,.checkout-plan h2{margin-bottom:14px}
+.checkout-contact label{display:flex;flex-direction:column;gap:9px;margin:14px 0;color:#ccced5;font-size:12px}
+.checkout-contact input{min-height:46px;border:1px solid #434751;border-radius:7px;background:#181b20;color:#fff;padding:13px 15px;font:inherit;font-size:13px;max-width:100%}
+.checkout-contact input:focus{outline:2px solid #80ddcc;outline-offset:2px}
+.checkout-plan{margin-top:27px;padding:25px 0 0;border-top:1px solid #35383e}
+.checkout-plan label{display:flex;align-items:flex-start;gap:14px;border:1px solid #373b43;border-radius:7px;margin:10px 0;padding:18px;color:#f5f5f5;font-size:13px;cursor:pointer}
+.checkout-plan label:has(input:checked){background:#202729;border-color:#77cab9}
+.checkout-plan input{accent-color:#80ddcc;width:17px;height:17px;margin-top:2px}
+.checkout-plan label span{display:flex;flex-direction:column;gap:8px}
+.checkout-plan label small{font-size:11px;line-height:1.5;color:#a7acb5}
+.checkout-due{margin:13px 0 19px}
+.checkout-error{color:#f5b6b6;border-left:2px solid #d77f7f;font-size:12px;line-height:1.6;padding:12px;background:#4b27272e}
+.booking-reference{font-size:14px!important;margin:10px 0 30px!important;color:#f5f6f6!important}
+.booking-reference strong{color:#a5e7d8}
+@media(max-width:1150px){
+  .header nav{margin-left:20px;gap:20px}
+  .nav-tools{gap:12px}
+}
+@media(max-width:760px){
+  .header nav{display:none}
+  .workspace-mobile-nav{display:flex!important;align-items:center;justify-content:center;gap:6px;color:#dbdee3!important;padding:8px!important}
+  .workspace-mobile-nav span{font-size:11px}
+  .location{display:none}
+}
+@media(max-width:420px){.workspace-mobile-nav span{display:none}}
+
+/* Account workspace icon lives at the far right of the header. */
+.workspace-account{display:inline-flex!important;align-items:center;justify-content:center;min-width:36px;min-height:36px;border-radius:50%;transition:background .2s,color .2s}
+.workspace-account:hover,.workspace-account.active{background:rgba(255,255,255,.1);color:#fff}
+
+/* Compact ticket icon with a hover/focus preview, also usable by touch. */
+.ticket-menu{position:relative;display:flex;align-items:center;justify-content:center}
+.ticket-menu .ticket-nav{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:36px;padding:7px;border-radius:50%}
+.ticket-menu .ticket-nav:hover,.ticket-menu:focus-within .ticket-nav{background:rgba(255,255,255,.1)}
+.ticket-menu .ticket-count{position:absolute;top:-3px;right:-5px;min-width:17px;height:17px;display:grid;place-items:center;padding:0 4px;font-size:10px}
+.ticket-menu-popover{position:absolute;z-index:100;top:calc(100% + 13px);right:-42px;width:260px;max-width:calc(100vw - 32px);padding:20px;background:#1a1c21;border:1px solid #383b43;border-radius:10px;box-shadow:0 18px 55px #0009;display:flex;flex-direction:column;gap:11px;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-6px);transition:opacity .18s ease,transform .18s ease,visibility .18s}
+.ticket-menu-popover::before{content:"";position:absolute;bottom:100%;left:0;right:0;height:15px}
+.ticket-menu:hover .ticket-menu-popover,.ticket-menu:focus-within .ticket-menu-popover{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
+.ticket-menu-title{font-size:15px;font-weight:600;letter-spacing:-.01em;color:#f5f5f5}
+.ticket-menu-description{font-size:12px;line-height:1.6;color:#aeb1b9}
+.ticket-menu-popover button{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:4px;padding:11px 13px;border:1px solid #454951;border-radius:6px;background:#282b32;color:#fff;font-size:12px;text-align:left}
+.ticket-menu-popover button:hover{background:#363b43}
+@media(max-width:600px){.ticket-menu .ticket-nav{padding:7px}.ticket-menu-popover{right:-42px;width:235px}}
+@media(prefers-reduced-motion:reduce){.ticket-menu-popover{transition:none}}
+.ticket-menu.is-open .ticket-menu-popover{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
+
+/* Movie catalogue image placeholders: displayed when a listing has no licensed artwork. */
+.movie-art-placeholder { background: linear-gradient(145deg, #263247 0%, #141b29 52%, #12151e 100%); color: #f1f2f4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; text-align: center; padding: 20px; overflow: hidden; }
+.movie-art-placeholder svg { flex-shrink: 0; opacity: .55; }
+.movie-art-placeholder span { max-width: 90%; font-weight: 600; font-size: clamp(14px, 1.7vw, 24px); line-height: 1.3; overflow-wrap: anywhere; text-wrap: balance; }
+.hero-art.movie-art-placeholder { position: absolute; inset: 0; width: 100%; height: 100%; align-items: flex-end; padding: 8% 12%; }
+.hero-art.movie-art-placeholder svg, .hero-art.movie-art-placeholder span { display: none; }
+.poster-wrap > .movie-art-placeholder { width: 100%; height: 100%; aspect-ratio: 2 / 3; }
+.detail-poster > .movie-art-placeholder { width: 100%; min-height: 420px; }
+
+.hero { isolation: isolate; }
+.hero-art-landscape { object-position: center 35%; filter: brightness(.58) saturate(.9); }
+.ticket-unavailable .button { opacity: .68; }
+.ticket-unavailable .note { max-width: 430px; margin-top: 12px; }
+.hero-trailer-button {border:1px solid rgba(255,255,255,.6);background:rgba(14,18,25,.58);color:#fff;backdrop-filter:blur(12px)}
+@media (min-width: 601px) and (max-width: 900px) {
+  .hero { height: 520px; min-height: 520px; }
+  .hero-content { width: 65%; max-width: 560px; padding: 64px 5.5% 72px; }
+  .hero h1 { font-size: clamp(48px, 6vw, 56px); letter-spacing: -2.5px; }
+}
+.hero-navigation { padding: 0 4px; }
+.hero-arrow { width: 36px; height: 36px; }
+@media (max-width: 600px) {
+  .hero-navigation { padding: 0 5%; }
+  .hero-arrow { width: 38px; height: 38px; }
+}
+/* Never display legacy demo releases while the Philippine catalogue loads. */
+.hero-catalogue-loading { background: radial-gradient(ellipse at 70% 35%, #22262c, #0b0c0e 62%); display:flex; align-items:center; min-height:480px; }
+.hero-loading-copy { position:relative; z-index:2; max-width:560px; padding:8%; }
+.hero-loading-copy h1 { font-size:clamp(34px,4vw,62px); line-height:1.08; margin:24px 0; letter-spacing:-.045em; }
+.hero-loading-copy p { color:#afb3bc; line-height:1.6; }
