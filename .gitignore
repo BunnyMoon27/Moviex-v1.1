@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env.local
+*.tsbuildinfo
+
+.vercel
+
+.env
+.env.*
+!.env.example
+shot*.png
+crop-*.png
