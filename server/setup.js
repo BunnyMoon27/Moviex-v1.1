@@ -26,7 +26,7 @@ const email = process.env.SETUP_EMAIL?.trim().toLowerCase();
 const password = process.env.SETUP_PASSWORD;
 const role = process.env.SETUP_ROLE;
 if (email || password || role) {
-  if (!email || !password || password.length < 12 || !["admin", "employee"].includes(role)) throw new Error("Provide SETUP_EMAIL, SETUP_PASSWORD (12+ characters), SETUP_ROLE=admin|employee");
+  if (!email || !password || password.length < 8 || !["admin", "employee"].includes(role)) throw new Error("Provide SETUP_EMAIL, SETUP_PASSWORD (8+ characters), SETUP_ROLE=admin|employee");
   const users = db.collection("users");
   if (await users.findOne({ email })) throw new Error("Account exists; setup will not overwrite it");
   await users.insertOne({ name: role === "admin" ? "MovieX Administrator" : "Cinema Staff", email, passwordHash: await bcrypt.hash(password, 12), role, createdAt: new Date(), updatedAt: new Date() });

@@ -55,6 +55,11 @@ export const showtimeTimestamp = (date: string, time: string): number => {
   const h = (Number(match[1]) % 12) + (match[3].toUpperCase() === "PM" ? 12 : 0);
   return new Date(`${date}T${String(h).padStart(2, "0")}:${match[2]}:00+08:00`).getTime();
 };
+export const nextShowtimeSlot = (now = Date.now()) => {
+  const date = phDate();
+  const time = SHOWTIMES.find((slot) => showtimeTimestamp(date, slot) > now);
+  return time ? { date, time } : { date: phDate(1), time: SHOWTIMES[0] };
+};
 export const showtimeStatus = (date: string, time: string, now = Date.now()) => {
   const start = showtimeTimestamp(date, time);
   if (!Number.isFinite(start)) return "Unknown" as const;

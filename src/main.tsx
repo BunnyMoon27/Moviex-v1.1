@@ -156,8 +156,15 @@ function App() {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [ticketMenuOpen, setTicketMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia("(max-width: 600px)").matches);
   const searchRef = useRef<HTMLInputElement>(null);
   const mainRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 600px)");
+    const update = () => setIsMobile(media.matches);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -246,7 +253,11 @@ function App() {
   );
   const genres = ["All movies", ...new Set(uniqueMovies.flatMap((m) => m.genres))];
   const featured = useMemo(() => phMovies, [phMovies]);
+  const featuredForViewport = useMemo(() => isMobile ? featured.slice(0, 5) : featured, [featured, isMobile]);
   useEffect(() => { if (phMovies.length) setMovie((current) => phMovies.find((item) => item.id === current.id) || phMovies[0]); }, [phMovies]);
+  useEffect(() => {
+    if (featuredForViewport.length && !featuredForViewport.some((item) => item.id === movie.id)) setMovie(featuredForViewport[0]);
+  }, [featuredForViewport, movie.id]);
   const bookingMovieId = movie.bookingMovieId;
   const movieHasShowtimes = bookingMovieId != null && demoData.showtimes.some((s) => s.movieId === bookingMovieId && showtimeStatus(s.date, s.time) === "Upcoming");
   const selectedShow = demoData.showtimes.find((s) => s.id === selectedShowId && s.movieId === bookingMovieId);
@@ -284,17 +295,17 @@ function App() {
 
   const changeFeature = (direction: -1 | 1) => {
     setMovie(
-      (current) => adjacentMovie(featured, current.id, direction) ?? current,
+      (current) => adjacentMovie(featuredForViewport, current.id, direction) ?? current,
     );
   };
 
   useEffect(() => {
-    if (screen !== "home" || featured.length < 2) return;
+    if (screen !== "home" || featuredForViewport.length < 2) return;
     const timer = window.setTimeout(() => {
       changeFeature(1);
     }, 6000);
     return () => window.clearTimeout(timer);
-  }, [screen, featured, movie.id]);
+  }, [screen, featuredForViewport, movie.id]);
   const submitBooking = async () => {
     setBookingError("");
     if (!selectedShow || !seats.length) return setBookingError("Choose a screening and at least one seat.");
@@ -446,7 +457,7 @@ function App() {
                 <button
                   className="hero-arrow"
                   aria-label="Previous movie"
-                  disabled={featured.length < 2}
+                  disabled={featuredForViewport.length < 2}
                   onClick={() => changeFeature(-1)}
                 >
                   <ArrowLeft size={22} />
@@ -454,7 +465,7 @@ function App() {
                 <button
                   className="hero-arrow"
                   aria-label="Next movie"
-                  disabled={featured.length < 2}
+                  disabled={featuredForViewport.length < 2}
                   onClick={() => changeFeature(1)}
                 >
                   <ArrowRight size={22} />
@@ -483,7 +494,7 @@ function App() {
                   {connected ? "FEATURED RELEASE" : "MOVIEX CINEMA"}
                 </span>
                 <div className="feature-controls" aria-label="Featured movie">
-                  {featured.map((m, i) => (
+                  {featuredForViewport.map((m, i) => (
                     <button
                       key={"film-" + m.id}
                       aria-label={`Feature ${m.title}`}
@@ -1073,6 +1084,7 @@ function App() {
           MOVIE<span>X</span>
         </button>
         <span>A better way to movie night.</span>
+        <a className="footer-admin" href="/?access=admin">Staff & admin sign in</a>
         <button onClick={() => go("about")}>
           About & credits <ArrowRight size={14} />
         </button>

@@ -14,7 +14,7 @@
 2. Copy `.env.example` to `.env`. Set `MONGODB_URI` and a cryptographically random `JWT_SECRET` at least 32 characters long. Do not commit this file.
 3. `npm install`
 4. `npm run seed` to seed the sample catalogue and preview screenings.
-5. To create a privileged account, temporarily set `SETUP_EMAIL`, `SETUP_PASSWORD` (12+ chars) and `SETUP_ROLE=admin` or `employee` in `.env`, then run `npm run seed` again. Remove the SETUP_* entries afterward. Public registration always creates customer accounts.
+5. Create the first administrator with `npm run admin:create`. Public registration always creates customer accounts.
 6. `npm run dev:full` starts the frontend and backend. Open http://127.0.0.1:5173.
 
 ## Routes
@@ -40,7 +40,7 @@ The seed adds the seven featured Philippine listings and preview schedules to Mo
 - Administrator login: http://127.0.0.1:5173/?access=admin
 - Cinema staff login: http://127.0.0.1:5173/?access=staff
 - The separate URLs are not linked from the public sign-in form. Backend role checks still apply.
-- Bootstrap the first admin with SETUP_EMAIL, SETUP_PASSWORD (12+ chars), SETUP_ROLE=admin in the ignored .env file, then run npm run seed. Remove SETUP_* values afterward.
+- Create the first admin with `npm run admin:create`. To reset an existing admin password, run `npm run admin:reset-password` from the project folder; you must have access to the configured database.
 - In the admin dashboard, open Accounts to create staff/admin users, change emails, names, roles or passwords, and revoke access.
 
 ## MongoDB Atlas handover
@@ -62,12 +62,8 @@ The seed adds the seven featured Philippine listings and preview schedules to Mo
 These routes require a valid administrator account.
 
 
-## This PC: working local MongoDB
+## Local MongoDB helper
 
-MongoDB Community Server 9.0 is installed as a Windows service on port 27017. MovieX uses its own replica-set instance `rs0` on port 27018, with files in `%LOCALAPPDATA%\MovieX\mongodb\data` and logs in `%LOCALAPPDATA%\MovieX\mongodb\logs`. The ignored `.env` already points to `mongodb://127.0.0.1:27018/moviex?replicaSet=rs0`.
+The `npm run db:start` helper expects MongoDB Community Server 9.0 at `C:\Program Files\MongoDB\Server\9.0\bin\mongod.exe` and stores local data under your own `%LOCALAPPDATA%\MovieX\mongodb` folder. Those files are not part of this repository. If MongoDB is installed elsewhere, use your own replica set or Atlas URI in `.env`.
 
-For MongoDB Compass, connect to `mongodb://127.0.0.1:27018/?replicaSet=rs0` and open the `moviex` database.
-
-After restarting Windows, start the dedicated instance with `npm run db:start` from this project directory, then run `npm run dev:full`. The default MongoDB Windows service does not replace the MovieX replica-set instance.
-
-Seed the initial data with `npm run seed`. For the first administrator account, set the ignored `.env` SETUP_EMAIL, SETUP_PASSWORD, and SETUP_ROLE=admin values, run `npm run seed`, and then remove those setup values. Never publish administrator passwords.
+On a fresh local replica set, initialize it once with `mongosh "mongodb://127.0.0.1:27018" --eval "rs.initiate()"` before using booking transactions.

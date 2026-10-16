@@ -539,6 +539,8 @@ footer > button:not(.wordmark) {
   font-size: 10px;
   margin-left: auto;
 }
+.footer-admin { color: #bebfc5; font-size: 10px; white-space: nowrap; }
+.footer-admin:hover { color: #fff; }
 .footer-demo {
   font-size: 9px;
 }
@@ -1551,6 +1553,7 @@ footer > button:not(.wordmark) {
     padding: 0;
     justify-content: flex-start;
   }
+  .footer-admin { width: 100%; }
   .detail-grid {
     grid-template-columns: 1fr;
     gap: 28px;

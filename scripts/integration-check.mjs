@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 const api='http://127.0.0.1:4000/api';
-const id=randomUUID().slice(0,8), email=`test-admin-${id}@example.test`, pass='TestAdminPassword!123';
+const id=randomUUID().slice(0,8), email=`test-admin-${id}@example.test`, pass='Test1234';
 const checks=[];const assert=(label,ok,detail='')=>{checks.push({label,pass:!!ok,detail});console.log((ok?'PASS ':'FAIL ')+label+(detail?' '+detail:''));};
 const call=async(path,method='GET',body,token)=>{const r=await fetch(api+path,{method,headers:{...(body?{'Content-Type':'application/json'}:{}),...(token?{Authorization:'Bearer '+token}:{})},...(body?{body:JSON.stringify(body)}:{})});let data;try{data=await r.json()}catch{}return {status:r.status,data};};
 let admin,staff,customer,booking,cancelBooking,showtime;
@@ -13,6 +13,8 @@ try{
  const hash=await bcrypt.hash(pass,12);admin=await users.insertOne({name:'Integration Admin',email,passwordHash:hash,role:'admin',createdAt:new Date(),updatedAt:new Date()});
  const al=await call('/auth/login','POST',{email,password:pass});assert('Admin login',al.status===200&&al.data?.user?.role==='admin');const at=al.data?.token;
  const customerMail=`test-customer-${id}@example.test`;const cr=await call('/auth/register','POST',{name:'Integration Customer',email:customerMail,password:pass});assert('Customer registration',cr.status===201);customer=cr.data?.user?.id;const ct=cr.data?.token;
+ const tooShort=await call('/admin/accounts','POST',{name:'Short Password',email:`short-${id}@example.test`,password:'Test123',role:'employee'},at);assert('Admin password minimum is 8 characters',tooShort.status===400);
+ const pastDate=new Date(Date.now()-86400000).toLocaleDateString('en-CA',{timeZone:'Asia/Manila'});const pastShow=await call('/showtimes','POST',{movieId:1,cinema:'QA Cinema '+id,hall:'QA',date:pastDate,time:'10:30 AM',price:180},at);assert('Admin cannot create a past screening',pastShow.status===400);
  const denied=await call('/admin/accounts','GET',undefined,ct);assert('Customer blocked from admin accounts',denied.status===403);
  const sr=await call('/admin/accounts','POST',{name:'Integration Staff',email:`test-staff-${id}@example.test`,password:pass,role:'employee'},at);assert('Admin creates staff',sr.status===201,sr.data?.error||'');staff=sr.data?.id;
  const sl=await call('/auth/login','POST',{email:`test-staff-${id}@example.test`,password:pass});assert('Staff login',sl.status===200&&sl.data?.user?.role==='employee');const st=sl.data?.token;

@@ -2,7 +2,7 @@
 import { test } from "node:test";
 // @ts-ignore Node supplies assertions.
 import assert from "node:assert/strict";
-import { isEmail, pageCount, pageItems, readStore, reservedSeats, showtimeStatus, showtimeTimestamp, type DemoBooking } from "./demoStore.ts";
+import { isEmail, nextShowtimeSlot, pageCount, pageItems, readStore, reservedSeats, showtimeStatus, showtimeTimestamp, type DemoBooking } from "./demoStore.ts";
 
 test("demo data includes distinct movies, screening IDs and bookings", () => {
   const state = readStore();
@@ -15,6 +15,11 @@ test("Manila-local showtimes classify upcoming, ongoing, and finished", () => {
   assert.equal(showtimeStatus("2026-10-16", "07:30 PM", start - 1000), "Upcoming");
   assert.equal(showtimeStatus("2026-10-16", "07:30 PM", start + 30000), "Ongoing");
   assert.equal(showtimeStatus("2026-10-16", "07:30 PM", start + 4 * 3600000), "Finished");
+});
+test("new screenings default to the next future slot in Manila time", () => {
+  const now = showtimeTimestamp("2026-10-16", "04:30 PM") + 1;
+  assert.deepEqual(nextShowtimeSlot(now), { date: "2026-10-16", time: "07:30 PM" });
+  assert.deepEqual(nextShowtimeSlot(showtimeTimestamp("2026-10-16", "07:30 PM")), { date: "2026-10-17", time: "10:30 AM" });
 });
 test("cancelled bookings free up their demo seats", () => {
   const b = readStore().bookings[0];

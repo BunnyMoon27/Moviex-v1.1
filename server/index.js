@@ -91,6 +91,12 @@ const showInput = z.object({
   date: z.iso.date(), time: z.string().regex(/^(0?[1-9]|1[0-2]):[0-5]\d (AM|PM)$/),
   price: z.number().positive(),
 }).strict();
+const showtimeStart = ({ date, time }) => {
+  const match = /^(\d{1,2}):(\d{2}) (AM|PM)$/.exec(time);
+  if (!match) return NaN;
+  const hour = (Number(match[1]) % 12) + (match[3] === "PM" ? 12 : 0);
+  return Date.parse(`${date}T${String(hour).padStart(2, "0")}:${match[2]}:00+08:00`);
+};
 const bookingInput = z.object({
   showtimeId: z.string().min(1), seats: z.array(z.string().regex(/^[A-G](?:[1-9]|10)$/)).min(1).max(8),
   method: z.enum(["GCash", "Maya", "Bank Transfer", "Credit / Debit Card"]),
@@ -393,12 +399,14 @@ app.get("/api/showtimes/:id/seats", safe(async (req, res) => {
 }));
 app.post("/api/showtimes", authenticate, allow("admin"), safe(async (req, res) => {
   const body = validate(showInput, req.body, res); if (!body) return;
+  if (showtimeStart(body) <= Date.now()) return fail(res, 400, "Screening must be scheduled in the future");
   if (!await Movie.exists({ id: body.movieId })) return fail(res, 400, "Unknown movie");
   const show = await Showtime.create({ ...body, id: body.id || randomUUID() });
   res.status(201).json(show);
 }));
 app.put("/api/showtimes/:id", authenticate, allow("admin"), safe(async (req, res) => {
   const body = validate(showInput, req.body, res); if (!body) return;
+  if (showtimeStart(body) <= Date.now()) return fail(res, 400, "Screening must be scheduled in the future");
   if (!await Movie.exists({ id: body.movieId })) return fail(res, 400, "Unknown movie");
   if (await Booking.exists({ showtimeId: req.params.id, status: { $ne: "Cancelled" } })) return fail(res, 409, "Cancel existing bookings before editing this screening");
   const show = await Showtime.findOneAndUpdate({ id: req.params.id }, { $set: { ...body, id: req.params.id } }, { new: true, runValidators: true });

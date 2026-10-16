@@ -5,13 +5,13 @@ export function registerAccountRoutes(app, { User, authenticate, allow, safe, fa
   const createInput = z.object({
     name: z.string().trim().min(2).max(100),
     email,
-    password: z.string().min(12).max(128),
+    password: z.string().min(8).max(128),
     role: z.enum(["employee", "admin"]),
   }).strict();
   const updateInput = z.object({
     name: z.string().trim().min(2).max(100).optional(),
     email: email.optional(),
-    password: z.string().min(12).max(128).optional(),
+    password: z.string().min(8).max(128).optional(),
     role: z.enum(["employee", "admin"]).optional(),
   }).strict().refine(data => Object.keys(data).length > 0, "No changes supplied");
   app.get("/api/admin/accounts", authenticate, allow("admin"), safe(async (_req, res) => {

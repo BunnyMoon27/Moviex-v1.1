@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { ArrowLeft, ArrowRight, CalendarBlank, Check, CheckCircle, Clock, FilmSlate, MagnifyingGlass, PencilSimple, Plus, ShieldCheck, Eye, EyeSlash, SignOut, Ticket, Trash, Users, WarningCircle, X } from "@phosphor-icons/react";
 import type { Movie } from "./catalogue";
 import { money } from "./booking";
-import { CINEMAS, SHOWTIMES, isEmail, pageCount, pageItems, phDate, showtimeStatus, showtimeTimestamp, uid, type BookingStatus, type DemoBooking, type DemoShowtime, type DemoStore, type Role } from "./demoStore";
+import { CINEMAS, SHOWTIMES, isEmail, nextShowtimeSlot, pageCount, pageItems, phDate, showtimeStatus, showtimeTimestamp, uid, type BookingStatus, type DemoBooking, type DemoShowtime, type DemoStore, type Role } from "./demoStore";
 import "./workspace.css";
 import { api, signInApi, registerApi, type ApiUser } from "./api";
 import { AccountManager } from "./AccountManager";
@@ -68,13 +68,16 @@ function FilmForm({ movie, onCancel, onSave }: { movie?: Movie; onCancel: () => 
 }
 function ShowForm({ show, data, onCancel, onSave }: { show?: DemoShowtime; data: DemoStore; onCancel: () => void; onSave: (s: DemoShowtime) => Promise<void> }) {
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState(() => show ? { movieId: show.movieId, cinema: show.cinema, hall: show.hall, date: show.date, time: show.time, price: show.price } : { movieId: data.movies[0]?.id ?? 0, cinema: CINEMAS[0], hall: "Cinema 1", date: phDate(), time: SHOWTIMES[0], price: 260 });
+  const [form, setForm] = useState(() => {
+    if (show) return { movieId: show.movieId, cinema: show.cinema, hall: show.hall, date: show.date, time: show.time, price: show.price };
+    return { movieId: data.movies[0]?.id ?? 0, cinema: CINEMAS[0], hall: "Cinema 1", ...nextShowtimeSlot(), price: 260 };
+  });
   const [error, setError] = useState("");
   const save = async (e: FormEvent) => {
     e.preventDefault();
     if (!data.movies.some((m) => m.id === form.movieId) || !form.hall.trim()) return setError("Select a movie and enter the cinema screen.");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(form.date) || Number.isNaN(showtimeTimestamp(form.date, form.time))) return setError("Provide a valid screening date and time.");
-    if (!show && form.date < phDate()) return setError("You cannot create showtimes in the past.");
+    if (showtimeTimestamp(form.date, form.time) <= Date.now()) return setError("Choose a screening date and time in the future.");
     if (!Number.isFinite(form.price) || form.price <= 0) return setError("Price must be positive.");
     if (data.showtimes.some((s) => s.id !== show?.id && s.cinema === form.cinema && s.hall.toLowerCase() === form.hall.trim().toLowerCase() && s.date === form.date && s.time === form.time)) return setError("This screen already has a screening at the same date and time.");
     setSaving(true);
@@ -107,6 +110,7 @@ export function DemoWorkspace({ data, onChange, onBrowse, onOpenMovie, onAuthent
   const [password, setPassword] = useState("");
   const [passwordAgain, setPasswordAgain] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordAgain, setShowPasswordAgain] = useState(false);
   const [staySignedIn, setStaySignedIn] = useState(false);
   const [authError, setAuthError] = useState("");
   const [tab, setTab] = useState("overview");
@@ -251,7 +255,7 @@ export function DemoWorkspace({ data, onChange, onBrowse, onOpenMovie, onAuthent
         {!dedicatedRole && authMode === "signup" && <label>Full name<input value={name} placeholder="Full name" onChange={(e) => setName(e.target.value)}/></label>}
         <label>Email<input type="email" autoComplete="username" value={email} placeholder="name@example.com" onChange={(e) => setEmail(e.target.value)}/></label>
         <label>Password<div className="ws-password-field"><input type={showPassword ? "text" : "password"} autoComplete={authMode === "signup" ? "new-password" : "current-password"} value={password} placeholder="Enter your password" onChange={(e) => setPassword(e.target.value)}/><button type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} onClick={() => setShowPassword((v) => !v)}>{showPassword ? <EyeSlash size={19}/> : <Eye size={19}/>}</button></div></label>
-        {!dedicatedRole && authMode === "signup" && <label>Confirm password<input type="password" autoComplete="new-password" value={passwordAgain} onChange={(e) => setPasswordAgain(e.target.value)}/></label>}
+        {!dedicatedRole && authMode === "signup" && <label>Confirm password<div className="ws-password-field"><input type={showPasswordAgain ? "text" : "password"} autoComplete="new-password" value={passwordAgain} onChange={(e) => setPasswordAgain(e.target.value)}/><button type="button" aria-label={showPasswordAgain ? "Hide confirmation password" : "Show confirmation password"} aria-pressed={showPasswordAgain} onClick={() => setShowPasswordAgain((v) => !v)}>{showPasswordAgain ? <EyeSlash size={19}/> : <Eye size={19}/>}</button></div></label>}
         {(dedicatedRole || authMode === "signin") && <label className="ws-stay-login"><input type="checkbox" checked={staySignedIn} onChange={(e) => setStaySignedIn(e.target.checked)}/><span>Stay signed in</span></label>}
         {authError && <p role="alert" className="ws-error">{authError}</p>}
         <button className="ws-primary ws-full" type="submit">{!dedicatedRole && authMode === "signup" ? "Create account" : "Sign in"} <ArrowRight size={16}/></button>
@@ -260,7 +264,7 @@ export function DemoWorkspace({ data, onChange, onBrowse, onOpenMovie, onAuthent
     </div>
   </section>;
   return <section className="ws-page"><div className="ws-shell">
-    <div className="ws-topline"><span><i/>MONGODB WORKSPACE</span><button onClick={() => { sessionStorage.removeItem("moviex-api-token"); localStorage.removeItem("moviex-api-token"); setSession(null); onSignedOut(); }}><SignOut size={17}/> Sign out</button></div>
+    <div className="ws-topline"><span><i/>MONGODB WORKSPACE</span><button onClick={() => { sessionStorage.removeItem("moviex-api-token"); localStorage.removeItem("moviex-api-token"); setSession(null); setName(""); setEmail(""); setPassword(""); setPasswordAgain(""); setShowPassword(false); setShowPasswordAgain(false); setAuthMode("signin"); setAuthError(""); onSignedOut(); }}><SignOut size={17}/> Sign out</button></div>
     <div className="ws-heading"><div><span className="ws-eyebrow">{chosenRole.title.toUpperCase()} SPACE</span>
       <h1>{admin ? "Cinema operations." : staff ? "The check-in desk." : "Your movie nights."}</h1>
       <p>{admin ? "Everything you need to manage a cinema, in one place." : staff ? "Today's screenings and ticket verification." : "Manage your tickets and find your next movie."}</p>

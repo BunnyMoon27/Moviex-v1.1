@@ -17,7 +17,7 @@ export function AccountManager({ currentEmail }: { currentEmail: string }) {
   useEffect(() => { void load(); }, []);
   const save = async (event: FormEvent) => {
     event.preventDefault(); setError(""); setNotice("");
-    if (draft.password && draft.password.length < 12) return setError("Use at least 12 characters for the password.");
+    if (draft.password && draft.password.length < 8) return setError("Use at least 8 characters for the password.");
     if (!editing && !draft.password) return setError("A password is required for new accounts.");
     setBusy(true);
     try {
@@ -48,7 +48,7 @@ export function AccountManager({ currentEmail }: { currentEmail: string }) {
         <label>Name<input required minLength={2} value={draft.name} onChange={e => setDraft({ ...draft, name: e.target.value })}/></label>
         <label>Email<input required type="email" value={draft.email} onChange={e => setDraft({ ...draft, email: e.target.value })}/></label>
         <label>Access role<select value={draft.role} onChange={e => setDraft({ ...draft, role: e.target.value as Draft["role"] })}><option value="employee">Cinema staff</option><option value="admin">Administrator</option></select></label>
-        <label>{editing ? "New password (leave blank to keep existing)" : "Temporary password (12+ characters)"}<input type="password" minLength={12} autoComplete="new-password" value={draft.password} onChange={e => setDraft({ ...draft, password: e.target.value })}/></label>
+        <label>{editing ? "New password (leave blank to keep existing)" : "Temporary password (8+ characters)"}<input type="password" minLength={8} autoComplete="new-password" value={draft.password} onChange={e => setDraft({ ...draft, password: e.target.value })}/></label>
       </div>
       <div className="ws-form-actions">{editing && <button type="button" className="ws-outline" onClick={() => { setEditing(null); setDraft(empty); }}>Cancel</button>}<button disabled={busy} className="ws-primary" type="submit">{busy ? "Saving..." : editing ? "Save changes" : "Create account"}</button></div>
     </form>

@@ -4,7 +4,7 @@ A local MERN cinema booking school project with a React/Vite/TypeScript frontend
 
 ## Run locally
 
-Requirements: Node.js 22.12+ or 24, npm, MongoDB with a replica set. This PC uses the dedicated MovieX replica set rs0 on port 27018 (not the default MongoDB service on 27017).
+Requirements: Node.js 22.12+ or 24, npm, and MongoDB configured as a replica set because bookings use transactions. Create your own private `.env` file; the repository includes only `.env.example`.
 
 1. Install dependencies with npm install.
 2. Copy .env.example to .env if needed. Keep .env private. Use a strong JWT_SECRET and MONGODB_URI pointing to the replica set.
@@ -12,7 +12,7 @@ Requirements: Node.js 22.12+ or 24, npm, MongoDB with a replica set. This PC use
 4. Use npm run dev:full to start Vite and the Express API.
 5. Open http://127.0.0.1:5173. The API health endpoint is http://127.0.0.1:4000/api/health.
 
-If setting up a fresh database, run npm run seed once to create example movies and showtimes. Do not reseed a populated database without checking the records first.
+For a fresh database, run `npm run seed` to add example movies and showtimes, then run `npm run admin:create` to create your own administrator. Do not reseed a populated database without checking the records first. If you forget the admin password, run `npm run admin:reset-password` from the project folder; it updates the matching admin account in the configured database.
 
 ## Roles and access
 
